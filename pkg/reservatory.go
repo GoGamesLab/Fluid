@@ -6,9 +6,9 @@ import (
 
 // Reservatório
 type Reservatory struct {
-	capacity    FluidUnit
-	stored      FluidUnit
-	lossPerTick FluidUnit
+	capacity FluidUnit
+	stored   FluidUnit
+	loss     FluidUnit
 }
 
 func NewReservatory(cap FluidUnit) *Reservatory {
@@ -54,7 +54,7 @@ func (r *Reservatory) Consume(amount FluidUnit) (FluidUnit, error) {
 	return use, nil
 }
 
-func (r *Reservatory) Demand() FluidUnit { return r.lossPerTick }
+func (r *Reservatory) Demand() FluidUnit { return r.loss }
 
 func (r *Reservatory) Peek() FluidUnit { return r.stored }
 
@@ -64,10 +64,10 @@ func (r *Reservatory) Stored() FluidUnit { return r.stored }
 
 // Apply tick loss aplica perda por tick; chamada externamente pelo simulador/tick loop.
 func (r *Reservatory) Update() {
-	if r.lossPerTick <= 0 || r.stored <= 0 {
+	if r.loss <= 0 || r.stored <= 0 {
 		return
 	}
 
-	l := math.Min(r.lossPerTick, r.stored)
+	l := math.Min(r.loss, r.stored)
 	r.stored -= l
 }
