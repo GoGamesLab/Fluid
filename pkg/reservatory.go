@@ -22,52 +22,52 @@ func NewReservatory(cap FluidUnit) *Reservatory {
 	}
 }
 
-func (b *Reservatory) Produce(amount FluidUnit) (FluidUnit, error) {
+func (r *Reservatory) Produce(amount FluidUnit) (FluidUnit, error) {
 	if amount <= 0 {
 		return 0, nil
 	}
 
-	space := b.capacity - b.stored
+	space := r.capacity - r.stored
 	if space <= 0 {
 		return 0, nil
 	}
 
 	add := math.Min(space, amount)
-	b.stored += add
+	r.stored += add
 
 	return add, nil
 }
 
-func (b *Reservatory) Consume(amount FluidUnit) (FluidUnit, error) {
+func (r *Reservatory) Consume(amount FluidUnit) (FluidUnit, error) {
 	if amount <= 0 {
 		return 0, nil
 	}
 
-	avail := b.stored
+	avail := r.stored
 	if avail <= 0 {
 		return 0, nil
 	}
 
 	use := math.Min(avail, amount)
-	b.stored -= use
+	r.stored -= use
 
 	return use, nil
 }
 
-func (b *Reservatory) Demand() FluidUnit { return b.lossPerTick }
+func (r *Reservatory) Demand() FluidUnit { return r.lossPerTick }
 
-func (b *Reservatory) Peek() FluidUnit { return b.stored }
+func (r *Reservatory) Peek() FluidUnit { return r.stored }
 
-func (b *Reservatory) Capacity() FluidUnit { return b.capacity }
+func (r *Reservatory) Capacity() FluidUnit { return r.capacity }
 
-func (b *Reservatory) Stored() FluidUnit { return b.stored }
+func (r *Reservatory) Stored() FluidUnit { return r.stored }
 
 // Apply tick loss aplica perda por tick; chamada externamente pelo simulador/tick loop.
-func (b *Reservatory) Update() {
-	if b.lossPerTick <= 0 || b.stored <= 0 {
+func (r *Reservatory) Update() {
+	if r.lossPerTick <= 0 || r.stored <= 0 {
 		return
 	}
 
-	l := math.Min(b.lossPerTick, b.stored)
-	b.stored -= l
+	l := math.Min(r.lossPerTick, r.stored)
+	r.stored -= l
 }

@@ -2,13 +2,10 @@ package fluid
 
 import (
 	"math"
-
-	materials "github.com/GoGamesLab/Materials/pkg"
 )
 
 type FluidNetwork struct {
-	FluidID  materials.SubstanceID
-	Amount   float32 // Quantidade atual na rede de tubos
+	Amount   float64 // Quantidade atual na rede de tubos
 	Pressure float32 // Determina a velocidade de escoamento
 }
 
@@ -51,9 +48,9 @@ func (p *FluidPipe) Transfer(from FluidSource, to FluidSink, want FluidUnit) (tr
 	// assumimos que injetar fluido em um Sink/Node é feito via Produce se for Node,
 	// ou se o 'to' for um acumulador.
 	// Nota: Se 'to' for uma máquina consumidora pura, ela precisará de um buffer interno (Reservatório)
-	produced, perr := to.(FluidSource).Produce(effective)
-	if perr != nil {
-		return 0, perr
+	produced, err := to.(FluidSource).Produce(effective)
+	if err != nil {
+		return 0, err
 	}
 
 	return produced, nil
