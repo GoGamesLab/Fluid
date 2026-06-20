@@ -2,35 +2,52 @@ package fluid
 
 type FluidUnit = float64
 
-// Fonte/sumidouro genérico de energia
 type FluidSource interface {
-	Produce(amount FluidUnit) (produced FluidUnit, err error) // tenta produzir até amount
-	Peek() FluidUnit                                          // quantidade disponível (instantânea)
+	Produce(amount FluidUnit) FluidUnit
+	Peek() FluidUnit
 }
 
-// Consome energia
 type FluidSink interface {
-	Consume(amount FluidUnit) (consumed FluidUnit, err error) // tenta consumir até amount
-	Demand() FluidUnit                                        // demanda desejada (p.ex. por tick)
+	Consume()
+	Demand() FluidUnit
 }
 
-// Fonte e sumidouro combinados (reservatórios, nodes)
-type FluidNode interface {
-	FluidSource
-	FluidSink
-	Capacity() FluidUnit
-	Stored() FluidUnit
-}
-
-// Converters registry and nodes
 type FluidManager struct {
-	nodes map[string]FluidNode
+	FluidSources map[string]FluidSource
+	FluidSinks   map[string]FluidSink
 }
 
 func NewFluidManager() *FluidManager {
 	return &FluidManager{
-		nodes: make(map[string]FluidNode),
+		FluidSources: make(map[string]FluidSource),
+		FluidSinks:   make(map[string]FluidSink),
 	}
 }
 
-func (m *FluidManager) RegisterNode(id string, n FluidNode) { m.nodes[id] = n }
+func (m *FluidManager) RegisterSource(id string, n FluidSource) { m.FluidSources[id] = n }
+func (m *FluidManager) RegisterSink(id string, n FluidSink)     { m.FluidSinks[id] = n }
+
+func (m *FluidManager) Update() {
+	for _, sink := range m.FluidSinks {
+		need := sink.Demand()
+		if need == 0 {
+			continue
+		}
+
+		got := FluidUnit(0)
+
+		for _, src := range m.FluidSources {
+			if got >= need {
+				break
+			}
+
+			remaining := need - got
+			produced := src.Produce(remaining)
+			got += produced
+		}
+
+		if got+1e-9 >= need {
+			sink.Consume()
+		}
+	}
+}
