@@ -3,12 +3,12 @@ package fluid
 type FluidUnit = float64
 
 type FluidSource interface {
-	Produce(amount FluidUnit) FluidUnit
+	ProduceFluid(amount FluidUnit) FluidUnit
 	Peek() FluidUnit
 }
 
 type FluidSink interface {
-	Consume()
+	ConsumeFluid()
 	Demand() FluidUnit
 }
 
@@ -42,12 +42,12 @@ func (m *FluidManager) Update() {
 			}
 
 			remaining := need - got
-			produced := src.Produce(remaining)
+			produced := src.ProduceFluid(remaining)
 			got += produced
 		}
 
 		if got+1e-9 >= need {
-			sink.Consume()
+			sink.ConsumeFluid()
 		}
 	}
 }
